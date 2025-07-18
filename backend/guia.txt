@@ -1,0 +1,17 @@
+Estas configuraciones te permiten manejar archivos estáticos (como CSS, JavaScript e imágenes que no cambian) y archivos de medios (como imágenes subidas por los usuarios) de manera eficiente en tu proyecto Django
+
+Código	                                    Descripción
+STATIC_URL = 'static/'	                    Define la URL base para los archivos estáticos. Cuando Django necesita referenciar un archivo estático en una plantilla, usará esta URL. Por ejemplo, si tienes un archivo CSS en static/css/style.css, en la plantilla se referenciará como /static/css/style.css.
+STATICFILES_DIRS = [BASE_DIR / 'static',]	Especifica las rutas adicionales donde Django debe buscar archivos estáticos. BASE_DIR es la ruta base de tu proyecto, y BASE_DIR / 'static' apunta a una carpeta llamada static dentro de tu proyecto. Esto es útil para archivos estáticos que no están dentro de una aplicación específica.
+STATIC_ROOT = BASE_DIR / 'staticfiles'	    Define la ruta donde se recopilarán todos los archivos estáticos cuando ejecutes el comando collectstatic. Esto es útil en producción, donde todos los archivos estáticos se recopilan en una sola carpeta para que puedan ser servidos eficientemente por un servidor web.
+MEDIA_URL = '/media/'	                    Define la URL base para los archivos subidos por los usuarios. Similar a STATIC_URL, pero para archivos que los usuarios suben a tu aplicación.
+MEDIA_ROOT = BASE_DIR / 'media'	            Define la ruta absoluta en el sistema de archivos donde se almacenarán los archivos subidos por los usuarios. Por ejemplo, si un usuario sube una imagen, se guardará en la carpeta media dentro de tu proyecto.
+
+
+
+La razón por la que se colocan estas líneas en las URLs de un proyecto Django es para servir archivos estáticos y de medios durante el desarrollo. Aquí te explico cada parte:
+Estas líneas solo deben usarse en el entorno de desarrollo. En producción, se recomienda servir archivos estáticos y de medios a través de un servidor web como Nginx o Apache, ya que Django no está optimizado para servir archivos estáticos de manera eficiente en producción.
+
+Código	                                                                        Descripción
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)	Esta línea se utiliza para servir archivos estáticos (como CSS, JavaScript e imágenes) durante el desarrollo. La función static se importa de django.conf.urls.static. Durante el desarrollo, Django no sirve archivos estáticos por defecto, por lo que esta línea permite que los archivos estáticos sean accesibles a través de la URL definida en STATIC_URL. document_root=settings.STATIC_ROOT especifica la ruta en el sistema de archivos donde se encuentran los archivos estáticos.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)	Esta línea se utiliza para servir archivos de medios (como imágenes subidas por los usuarios) durante el desarrollo. Similar a la línea anterior, pero para archivos de medios. MEDIA_URL define la URL base para acceder a los archivos de medios, y document_root=settings.MEDIA_ROOT especifica la ruta en el sistema de archivos donde se almacenan estos archivos.
