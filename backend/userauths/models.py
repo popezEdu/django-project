@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+# En Django, una señal es un mecanismo que permite a diferentes partes de una aplicación comunicarse entre sí 
+# sin estar acopladas directamente. Es como un sistema de notificaciones que permite a los componentes reaccionar 
+# a eventos que ocurren en otras partes de la aplicación.
+from django.db.models.signals import post_save
+
 
 from shortuuid.django_fields import ShortUUIDField
 
@@ -29,7 +34,7 @@ class User(AbstractUser):
         super(User, self).save(*args, **kwargs)
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to='image', null=True, blank=True, default='default/default-user.png')
     full_name = models.CharField(max_length=100, null=True, blank=True)
     about = models.TextField(null=True, blank=True)
@@ -53,3 +58,25 @@ class Profile(models.Model):
             self.full_name = self.user.full_name
         
         super(Profile, self).save(*args, **kwargs)
+
+    # Tipos de señales en Django:
+    # Señales de modelo:
+    # Se disparan antes o después de acciones como guardar o eliminar un objeto de modelo (ej. pre_save, post_save, pre_delete, post_delete). 
+    # Señales de gestión:
+    # Se disparan durante la gestión de la base de datos (ej. pre_migrate, post_migrate). 
+    # Señales de solicitud/respuesta:
+    # Se disparan durante el ciclo de vida de una solicitud HTTP (ej. request_started, request_finished, got_request_exception). 
+    # sender en este caso es la clase que lanzara el trigger .
+
+    # La clase que escucha la señal es la que tiene que definirla, indicando que clase la origina.
+
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
+
+    # create_user_profile y save_user_profile son las funciones creadas arriba.
+    post_save.connect(create_user_profile, sender=User)
+    post_save.connect(save_user_profile, sender=User)
